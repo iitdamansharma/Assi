@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Phone Handset · On-Ground.ai Human-to-Human WebRTC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0b141a;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .phone-frame {
+      width: 100%;
+      max-width: 375px;
+      min-height: 670px;
+      background: linear-gradient(180deg, #111b21 0%, #0b141a 100%);
+      border: 6px solid #222e35;
+      border-radius: 36px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .notch {
+      width: 120px;
+      height: 20px;
+      background: #222e35;
+      margin: 0 auto;
+      border-radius: 0 0 14px 14px;
+    }
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 20px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.25); }
+    }
+    .screen-body {
+      flex: 1;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+    .sub {
+      font-size: 11.5px;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+    .avatar-circle {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1b4332, #2d6a4f);
+      border: 2px solid #52b788;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin: 12px auto 8px;
+    }
+    .caller-name {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .caller-meta {
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .call-timer {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #34d399;
+      margin-top: 6px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 10px 14px;
+      transition: all 0.15s ease;
+    }
+    .btn-accept {
+      flex: 1;
+      background: #10b981;
+      color: #052e16;
+    }
+    .btn-accept:hover { background: #34d399; }
+    .btn-decline {
+      flex: 1;
+      background: #ef4444;
+      color: #fff;
+    }
+    .btn-decline:hover { background: #f87171; }
+    .btn-outbound {
+      width: 100%;
+      background: #2563eb;
+      color: #fff;
+      margin-top: 8px;
+    }
+    .btn-outbound:hover { background: #3b82f6; }
+    .transcript-box {
+      flex: 1;
+      min-height: 160px;
+      max-height: 220px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .msg {
+      padding: 7px 10px;
+      border-radius: 10px;
+      max-width: 88%;
+      line-height: 1.4;
+    }
+    .msg.agent {
+      background: #1e293b;
+      align-self: flex-start;
+      color: #e2e8f0;
+    }
+    .msg.customer {
+      background: #065f46;
+      align-self: flex-end;
+      color: #ecfdf5;
+    }
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      background: rgba(255, 255, 255, 0.07);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .chip:hover {
+      background: rgba(16, 185, 129, 0.2);
+      color: #fff;
+      border-color: #10b981;
+    }
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+    .input-row input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 9px 11px;
+      color: #fff;
+      font-size: 12px;
+    }
+    select {
+      width: 100%;
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span>Jio True5G · Bengaluru</span>
+      <span class="badge-live"><span class="dot"></span> WebRTC Handset Ready</span>
+    </div>
+
+    <div class="screen-body">
+      <div class="card">
+        <div class="title">Customer Companion Phone (Human-to-Human)</div>
+        <div class="sub">Receive live WebRTC calls placed from the On-Ground Call Centre app, or dial inbound to the agent console.</div>
+        <select id="personaSelect">
+          <option value="Mukunda Rao|+91 98450 11223|Whirlpool 7kg Front-Load Washer">Customer: Mukunda (+91 98450 11223)</option>
+          <option value="Ritu Sharma|+91 98450 44918|LG 1.5T 5-Star Dual Inverter AC">Customer: Ritu S. (+91 98450 44918)</option>
+          <option value="Faizan Ahmed|+91 98861 77812|Samsung 253L Frost-Free Fridge">Customer: Faizan A. (+91 98861 77812)</option>
+          <option value="Kavitha Reddy|+91 98451 33490|Bosch 13-Place Dishwasher">Customer: Kavitha R. (+91 98451 33490)</option>
+        </select>
+        <button class="btn-outbound" id="dialInboundBtn">📞 Dial Inbound to Call Centre Agent</button>
+      </div>
+
+      <div class="card" id="callStateCard">
+        <div class="avatar-circle" id="callerAvatar">OG</div>
+        <div class="caller-name" id="callerName">Idle · Waiting for Call</div>
+        <div class="caller-meta" id="callerMeta">Select "Human-to-Human (WebRTC)" in Call Centre & place a call</div>
+        <div class="call-timer" id="callTimer"></div>
+
+        <div class="btn-row" id="incomingBtns" style="display:none;">
+          <button class="btn-accept" id="acceptBtn">✓ Answer Call</button>
+          <button class="btn-decline" id="declineBtn">✕ Decline</button>
+        </div>
+        <div class="btn-row" id="activeBtns" style="display:none;">
+          <button class="btn-decline" id="hangupBtn">End Call</button>
+        </div>
+      </div>
+
+      <div class="transcript-box" id="transcriptBox">
+        <div class="sub" style="text-align:center; margin-top:40px;">Live bidirectional voice & transcript will appear here once connected.</div>
+      </div>
+
+      <div class="quick-chips">
+        <span class="chip" data-say="Hi Avani, what is the monthly no-cost EMI and exchange bonus on this model?">Ask EMI & Exchange</span>
+        <span class="chip" data-say="Does the 10-year motor warranty cover hard water in Bengaluru?">Ask Warranty</span>
+        <span class="chip" data-say="Sounds great! Please lock the quote and book tomorrow 10 AM installation.">Confirm Booking ✓</span>
+      </div>
+
+      <div class="input-row">
+        <input type="text" id="custInput" placeholder="Speak into mic or type customer reply..." />
+        <button class="btn-accept" id="sendBtn" style="flex:0 0 auto;">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="remoteAudio" autoplay></audio>
+
+  <script>
+    const channel = ('BroadcastChannel' in window) ? new BroadcastChannel('onground_webrtc_signaling') : null;
+    let ws = null;
+    let pc = null;
+    let localStream = null;
+    let callActive = false;
+    let timerInt = null;
+    let seconds = 0;
+
+    function sendSig(msg) {
+      const payload = { ...msg, sender: 'companion', timestamp: Date.now() };
+      if (channel) channel.postMessage(payload);
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload));
+    }
+
+    if (location.protocol.startsWith('http')) {
+      try {
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${proto}//${location.host}/ws`);
+        ws.onopen = () => sendSig({ type: 'companion-ready' });
+        ws.onmessage = (e) => {
+          try { handleSig(JSON.parse(e.data)); } catch (err) {}
+        };
+      } catch (e) {}
+    }
+
+    if (channel) {
+      channel.onmessage = (e) => handleSig(e.data);
+      sendSig({ type: 'companion-ready' });
+    }
+
+    function appendMsg(role, text) {
+      const box = document.getElementById('transcriptBox');
+      if (box.querySelector('.sub')) box.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.textContent = (role === 'agent' ? 'Avani: ' : 'You: ') + text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function handleSig(msg) {
+      if (!msg || msg.sender === 'companion') return;
+
+      if (msg.type === 'incoming-call') {
+        document.getElementById('callerName').textContent = msg.agentName || 'On-Ground.ai Call Centre';
+        document.getElementById('callerMeta').textContent = `Calling ${msg.lead.name} (${msg.lead.phone}) · ${msg.lead.product}`;
+        document.getElementById('incomingBtns').style.display = 'flex';
+        document.getElementById('activeBtns').style.display = 'none';
+        document.getElementById('callTimer').textContent = '📲 Ringing...';
+      } else if (msg.type === 'webrtc-offer') {
+        try {
+          pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+          pc.ontrack = (ev) => {
+            document.getElementById('remoteAudio').srcObject = ev.streams[0];
+          };
+          pc.onicecandidate = (ev) => {
+            if (ev.candidate) sendSig({ type: 'webrtc-ice', candidate: ev.candidate });
+          };
+          if (!localStream && navigator.mediaDevices) {
+            try {
+              localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+            } catch (e) {}
+          }
+          await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          sendSig({ type: 'webrtc-answer', sdp: answer });
+        } catch (e) {}
+      } else if (msg.type === 'webrtc-ice' && pc) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch (e) {}
+      } else if (msg.type === 'transcript' && msg.speaker === 'agent') {
+        appendMsg('agent', msg.text);
+      } else if (msg.type === 'call-ended') {
+        endLocalCall();
+      }
+    }
+
+    document.getElementById('acceptBtn').onclick = () => {
+      callActive = true;
+      seconds = 0;
+      document.getElementById('incomingBtns').style.display = 'none';
+      document.getElementById('activeBtns').style.display = 'flex';
+      document.getElementById('callTimer').textContent = 'Connected · 0m 00s';
+      clearInterval(timerInt);
+      timerInt = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60);
+        const s = String(seconds % 60).padStart(2, '0');
+        document.getElementById('callTimer').textContent = `Connected · ${m}m ${s}s`;
+      }, 1000);
+      sendSig({ type: 'call-accepted' });
+      sendCustomerLine('Hello Avani! Yes, I can hear you clearly on the line.');
+    };
+
+    document.getElementById('declineBtn').onclick = () => {
+      sendSig({ type: 'call-ended' });
+      endLocalCall();
+    };
+
+    document.getElementById('hangupBtn').onclick = () => {
+      sendSig({ type: 'call-ended' });
+      endLocalCall();
+    };
+
+    document.getElementById('dialInboundBtn').onclick = () => {
+      const val = document.getElementById('personaSelect').value.split('|');
+      sendSig({
+        type: 'customer-inbound-call',
+        lead: {
+          name: val[0],
+          phone: val[1],
+          preferredProduct: val[2]
+        }
+      });
+      document.getElementById('callerName').textContent = 'Dialing On-Ground.ai Agent...';
+      document.getElementById('callerMeta').textContent = `As ${val[0]} (${val[1]})`;
+      document.getElementById('callTimer').textContent = 'Waiting for Avani to answer...';
+    };
+
+    function endLocalCall() {
+      callActive = false;
+      clearInterval(timerInt);
+      document.getElementById('incomingBtns').style.display = 'none';
+      document.getElementById('activeBtns').style.display = 'none';
+      document.getElementById('callTimer').textContent = 'Call Ended';
+      if (pc) { try { pc.close(); } catch (e) {} pc = null; }
+    }
+
+    function sendCustomerLine(text) {
+      if (!text || !text.trim()) return;
+      appendMsg('customer', text.trim());
+      sendSig({
+        type: 'transcript',
+        speaker: 'customer',
+        text: text.trim()
+      });
+    }
+
+    document.getElementById('sendBtn').onclick = () => {
+      const inp = document.getElementById('custInput');
+      sendCustomerLine(inp.value);
+      inp.value = '';
+    };
+    document.getElementById('custInput').onkeydown = (e) => {
+      if (e.key === 'Enter') document.getElementById('sendBtn').click();
+    };
+    document.querySelectorAll('.chip').forEach(c => {
+      c.onclick = () => sendCustomerLine(c.getAttribute('data-say'));
+    });
+  </script>
+</body>
+</html>
