@@ -1,0 +1,13 @@
+{
+  "name": "onground-callcentre-app",
+  "version": "1.0.0",
+  "description": "On-Ground.ai Call Centre Command & Live Voice Copilot (AI-to-Human & Human-to-Human WebRTC Calling)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
