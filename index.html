@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>On-Ground.ai · Call Centre Command & Live Voice Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">OG</div>
+        <div>
+          <span class="brand-text">On-Ground.ai</span>
+          <span class="brand-sub">Call Centre Copilot</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-nav="dashboard">
+          <span class="nav-item-left"><span class="nav-icon">📊</span> Dashboard</span>
+        </button>
+
+        <button class="nav-item" data-nav="plan-outgoing">
+          <span class="nav-item-left"><span class="nav-icon">📞</span> Plan</span>
+          <span class="nav-badge green">5</span>
+        </button>
+
+        <div class="nav-sublist">
+          <button class="nav-subitem" data-nav="plan-outgoing">
+            <span>↗ Calls to make</span>
+            <span>5</span>
+          </button>
+          <button class="nav-subitem" data-nav="plan-incoming">
+            <span>↙ Incoming</span>
+            <span class="nav-badge" id="navMissedBadge">5</span>
+          </button>
+          <button class="nav-subitem" data-nav="plan-recent">
+            <span>🕒 Recent</span>
+          </button>
+          <button class="nav-subitem practice-btn" data-nav="practice-call">
+            <span>🎙️ Practise a call</span>
+          </button>
+        </div>
+
+        <button class="nav-item" data-nav="calendar">
+          <span class="nav-item-left"><span class="nav-icon">📅</span> Calendar</span>
+        </button>
+
+        <button class="nav-item" data-nav="pulse-home">
+          <span class="nav-item-left"><span class="nav-icon">💬</span> Pulse</span>
+          <span class="nav-badge">6</span>
+        </button>
+      </nav>
+
+      <!-- Real Calling Mode Selector in Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="calling-mode-card">
+          <div class="calling-mode-label">🟢 Live Calling Engine</div>
+          <select id="callingModeSelect" class="calling-mode-select">
+            <option value="ai">AI-to-Human Voice Call</option>
+            <option value="webrtc">Human-to-Human (WebRTC)</option>
+            <option value="tel">System Phone (tel:)</option>
+          </select>
+          <button class="companion-launch-btn" id="launchCompanionBtn" title="Opens a second phone window to receive & place real Human-to-Human WebRTC audio calls">
+            👥 Open Customer Handset
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Area -->
+    <div class="main-area">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">☰</button>
+          <div class="topbar-logo-pill">
+            <span style="color:#4ade80;">●</span>
+            <span>OG Call Centre</span>
+          </div>
+          <span class="topbar-hub-tag">Bengaluru South Hub</span>
+        </div>
+
+        <div class="topbar-right">
+          <button class="top-pill-btn notif-bell-btn" onclick="OGApp.openNotificationsModal()" title="Notifications">
+            🔔
+            <span class="notif-dot" id="notifCountDot">3</span>
+          </button>
+
+          <button class="top-pill-btn og-score-pill" onclick="OGApp.openOgScoreModal()" title="OG Score™ Radar">
+            <span>OG</span>
+            <strong id="topOgScoreVal">76</strong>
+          </button>
+
+          <button class="top-pill-btn rank-pill" onclick="OGApp.openLeaderboardModal()" title="Hub Leaderboard">
+            <span>⭐</span>
+            <strong id="topRankVal">#3</strong>
+          </button>
+
+          <button class="top-pill-btn avatar-pill" onclick="OGApp.openSellingAvatarModal()" title="Selling Avatar">
+            <span>🎭</span>
+            <span id="topAvatarLabel">Consultant</span>
+          </button>
+
+          <div class="user-chip" onclick="OGApp.openUserSettingsModal()">
+            <span class="user-avatar-sm">AS</span>
+            <span>Avani</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Simulated / Inbound Ringing Call Banner -->
+      <div class="incoming-call-banner" id="incomingCallBanner">
+        <div class="inc-left">
+          <div class="inc-ring-icon">📞</div>
+          <div>
+            <div style="font-weight:700; font-size:13px;" id="incCallerTitle">Incoming Call · Mukunda Rao (+91 98450 11223)</div>
+            <div style="font-size:11.5px; color:#a7f3d0;" id="incCallerSub">Whirlpool 7kg Front-Load Washer · Live Voice & AI Assist</div>
+          </div>
+        </div>
+        <div class="inc-actions">
+          <button class="btn-primary-call" style="background:#10b981; color:#052e16;" onclick="OGApp.acceptIncomingBannerCall()">✓ Accept & Open AI Assist</button>
+          <button class="ac-hangup-btn" onclick="OGApp.declineIncomingBannerCall()">✕ Decline</button>
+        </div>
+      </div>
+
+      <!-- Dynamic Screen Content -->
+      <main class="workspace-content" id="workspaceContent"></main>
+    </div>
+  </div>
+
+  <!-- Leads Paging Modal -->
+  <div class="modal-backdrop" id="leadsModal">
+    <div class="modal-sheet" id="leadsModalSheet"></div>
+  </div>
+
+  <!-- Generic Modal (SOP Review, Pre-Call Check, Wrap-Up, OG Radar, Leaderboard, Notifications, Keypad) -->
+  <div class="modal-backdrop" id="genericModal">
+    <div class="modal-sheet" id="genericModalSheet"></div>
+  </div>
+
+  <!-- Floating Dialpad FAB -->
+  <button class="floating-dial-fab" onclick="OGApp.openKeypadModal()">
+    <span>🔢</span>
+    <span>Dialer</span>
+  </button>
+
+  <!-- Mobile Bottom Navigation (Phone-width responsive bonus) -->
+  <nav class="mobile-bottom-nav">
+    <button class="mob-nav-btn active" data-nav="dashboard"><span>📊</span><span>Home</span></button>
+    <button class="mob-nav-btn" data-nav="plan-outgoing"><span>📞</span><span>Plan</span></button>
+    <button class="mob-nav-btn" data-nav="plan-incoming"><span>↙</span><span>Missed</span></button>
+    <button class="mob-nav-btn" data-nav="calendar"><span>📅</span><span>Calendar</span></button>
+    <button class="mob-nav-btn" data-nav="pulse-home"><span>💬</span><span>Pulse</span></button>
+  </nav>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="./js/data.js"></script>
+  <script src="./js/calling.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
